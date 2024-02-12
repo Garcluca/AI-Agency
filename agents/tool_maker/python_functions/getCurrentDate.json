@@ -1,0 +1,1 @@
+{'name': 'getCurrentDate', 'description': 'A function that opens Google Chrome, navigates to a search engine (such as Google), and queries the current date to retrieve and return the current date as a string.', 'parameters': {}}

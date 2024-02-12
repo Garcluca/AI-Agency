@@ -1,0 +1,1 @@
+{'name': 'roman_to_number', 'description': 'A function that converts Roman numerals to their corresponding integer values.', 'parameters': {'type': 'object', 'properties': {'roman_numeral': {'type': 'string', 'pattern': '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'}}, 'required': ['roman_numeral']}}
