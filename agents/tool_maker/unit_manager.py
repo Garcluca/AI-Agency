@@ -26,8 +26,13 @@ class Unit:
 
         :param Client client: OpenAI instance
         """
+
+        #instantiates the assistant and chat managers
+        # they probably share an agent thread pool with the inclusion of the client
+
         self.assistant_manager = AssistantManager(client=client)
         self.chat_manager = ChatManager(client=client)
+
         self.interface_assistant = self.assistant_manager.get_assistant()
         self.functional_assistant = self.assistant_manager.get_coding_assistant()
 
@@ -38,7 +43,13 @@ class Unit:
         """
         Accepts user input and performs a thread run with the `interface_assistant`
         """
+
+            # start with the main thread between the exec and the user.
+            # from there let the exec make new threads within the run function
+            # ?? possible error being the scoping of the threads, maybe need to pass the client thread interfece
+         
         while True:
+            print("GEWGNRHYEMJTEHQFBANSHMY5J4TH3RGQAFGNHMTSYRJTEHW")
             (
                 self.interface_assistant,
                 self.interface_thread,
@@ -49,6 +60,35 @@ class Unit:
                 functional_assistant=self.functional_assistant,
                 functional_thread=self.functional_thread,
             )
+
+    #   runs the actual exec cluster 
+    # idk   if it actully does allow it to apss teh thread createer and the agent creator to the other function without fucking it completeley
+    def exec_chat(self):
+        """
+        Accepts user input and performs a thread run with the `interface_assistant`
+        """
+
+            # start with the main thread between the exec and the user.
+            # from there let the exec make new threads within the run function
+            # ?? possible error being the scoping of the threads, maybe need to pass the client thread interfece
+         
+        while True:
+            print("GEWGNRHYEMJTEHQFBANSHMY5J4TH3RGQAFGNHMTSYRJTEHW")
+            #the loop is for killing the whole thing while preserving the 
+            (
+                self.interface_assistant,
+                self.interface_thread,
+                self.functional_thread,
+                self.assistant_manager,
+            ) = self.chat_manager.run_exec(
+                interface_assistant=self.interface_assistant,
+                interface_thread=self.interface_thread,
+                functional_assistant=self.functional_assistant,
+                functional_thread=self.functional_thread,
+                assistant_manager=self.assistant_manager,
+            )
+
+
 
 
 if __name__ == "__main__":

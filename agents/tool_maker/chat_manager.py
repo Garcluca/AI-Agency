@@ -1,12 +1,14 @@
 import importlib
 from pathlib import Path
 from agents.tool_maker.tool_manager import ToolManager
+from agents.tool_maker.assistant_manager import AssistantManager
 import json
 import os
 from openai import OpenAI
 
 Assistant = type(OpenAI().beta.assistants.list().data[0])
 Thread = type(OpenAI().beta.threads.create())
+
 
 
 class ChatManager:
@@ -170,6 +172,7 @@ class ChatManager:
         functional_assistant,
         functional_thread,
     ):
+        #seems like run is by default completed, it's not mentioned anywhere in the docs
         while run.status != "completed":
             run = self.client.beta.threads.runs.retrieve(
                 run_id=run.id, thread_id=interface_thread.id
@@ -211,6 +214,43 @@ class ChatManager:
             .text.value
         )
         return interface_assistant, response
+    
+
+    def begin_no_function_run(
+        self,
+        run,
+        interface_assistant,
+        interface_thread,
+        functional_assistant,
+        functional_thread,
+    ):
+        while run.status != "completed":
+            print("got to the inside of the run.status thing. shouldn't be here tho")
+            ##the runtime chills here until the api returns with a response
+            #could probably restructure it so this all happens outside this loop and hangs ont eh input function
+
+            run = self.client.beta.threads.runs.retrieve(
+                run_id=run.id, thread_id=interface_thread.id
+            )
+
+            print (run)
+            if run.status == "requires_action":
+                tools = []
+                responses = []
+                print(run.status)
+                print(run)
+                print(responses)
+        response = (
+            self.client.beta.threads.messages.list(thread_id=interface_thread.id)
+            .data[0]
+            .content[0]
+            .text.value
+        )
+        return interface_assistant, response
+    
+
+
+    
 
     #   interate on this to make more flexable agent loops
     #   currently hard coded with only 2 threads 
@@ -221,6 +261,7 @@ class ChatManager:
         functional_assistant: Assistant,
         functional_thread: Thread,
     ):
+        #talks to the exec agent
         self.client.beta.threads.messages.create(
             thread_id=interface_thread.id, content=input("type: "), role="user"
         )
@@ -231,14 +272,17 @@ class ChatManager:
             assistant_id=interface_assistant.id,
             instructions="please remember you are talking to an API, minimize output text tokens for cost saving. You are also able to communicate with the function ai using the description property of function_request.",
         )
-        #   goes between you and the exec agent
-        interface_assistant, response = self.begin_run(
+        #   runs the chat loop 
+        interface_assistant, response = self.begin_no_function_run(
             run=interface_run,
             interface_assistant=interface_assistant,
             interface_thread=interface_thread,
             functional_assistant=functional_assistant,
             functional_thread=functional_thread,
         )
+
+
+
         interface_thread = self.client.beta.threads.retrieve(
             thread_id=interface_thread.id
         )
@@ -248,3 +292,6 @@ class ChatManager:
         print(response)
         print()
         return interface_assistant, interface_thread, functional_thread
+    
+
+
