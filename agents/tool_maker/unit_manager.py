@@ -46,8 +46,6 @@ class Unit:
 
         print("instantiated the coding instances\n")
 
-        self.assistant_temp = self.assistant_manager.get_assistant()
-        self.thread_temp = self.chat_manager.create_empty_thread()
 
         print("instantiated the coding instances \n")
 
@@ -84,20 +82,13 @@ class Unit:
 
         #initalizing the the threads and assistants list for use later
         #this data structure is fairly basic and will need to be expended to a class later
-        for i in range(2):
-            print(f"\n\ncreated thread {i}")
-            self.thread_temp = self.chat_manager.create_empty_thread()
-            self.subthreads.append(self.thread_temp)
+        #put these into the function, they aren;t needed here
+        # no issyes with  the  thread bc the scoping won't die while the agents are relevant and the exec just sends a string to the thread 
+        #thread and assistant list should be in the inner class' scope too, much eadier to clean up unused threads
+        #should keep a running file system for the responses 
 
+        #removed the product things and made it so that they are less shittily palced and better placed to access and use for the exec agent
 
-        for i in range(2):
-            print(f"\n\n created assistant {i}")
-            self.assistant_temp = self.assistant_manager.get_assistant()
-            self.subagents.append(self.assistant_temp)
-            #print(self.subagents)
-
-
-       
         while True:
             print("set up agents\n")
             (
