@@ -33,11 +33,26 @@ class Unit:
         self.assistant_manager = AssistantManager(client=client)
         self.chat_manager = ChatManager(client=client)
 
+        print("instantiated the basic builders \n\n\n\n\n")
+
+        
         self.interface_assistant = self.assistant_manager.get_assistant()
         self.functional_assistant = self.assistant_manager.get_coding_assistant()
 
+
+        print("instantiated the assistant instances \n\n\n\n\n")
         self.interface_thread = self.chat_manager.create_empty_thread()
         self.functional_thread = self.chat_manager.create_empty_thread()
+
+        print("instantiated the coding instances \n\n\n\n\n")
+
+        self.assistant_temp = self.assistant_manager.get_assistant()
+        self.thread_temp = self.chat_manager.create_empty_thread()
+
+        print("instantiated the coding instances \n\n\n\n\n")
+
+        self.subthreads = []
+        self.subagents = []
 
     def chat(self):
         """
@@ -71,7 +86,22 @@ class Unit:
             # start with the main thread between the exec and the user.
             # from there let the exec make new threads within the run function
             # ?? possible error being the scoping of the threads, maybe need to pass the client thread interfece
-         
+
+        #initalizing the the threads and assistants
+        #this data structure is fairly basic and will need to be expended to a class later
+        for i in range(2):
+            print(f"\n\ncreated thread {i}")
+            self.thread_temp = self.chat_manager.create_empty_thread()
+            self.subthreads.append(self.thread_temp)
+
+        for i in range(2):
+            print(f"\n\n created assistant {i}")
+            self.assistant_temp = self.assistant_manager.get_assistant()
+            self.subagents.append(self.assistant_temp)
+            print(self.subagents)
+
+
+       
         while True:
             print("GEWGNRHYEMJTEHQFBANSHMY5J4TH3RGQAFGNHMTSYRJTEHW")
             #the loop is for killing the whole thing while preserving the 
@@ -80,12 +110,13 @@ class Unit:
                 self.interface_thread,
                 self.functional_thread,
                 self.assistant_manager,
-            ) = self.chat_manager.run_exec(
+            ) = self.chat_manager.run_unit(
+                subagents = self.subagents,
+                subthreads = self.subthreads,
                 interface_assistant=self.interface_assistant,
                 interface_thread=self.interface_thread,
                 functional_assistant=self.functional_assistant,
                 functional_thread=self.functional_thread,
-                assistant_manager=self.assistant_manager,
             )
 
 
@@ -95,6 +126,6 @@ if __name__ == "__main__":
     from shared.openai_config import get_openai_client
 
     client = get_openai_client()
-
+    print("got here\n\n\n\n\n")
     unit = Unit(client=client)
-    unit.chat()
+    unit.exec_chat()

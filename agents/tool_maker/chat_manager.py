@@ -221,13 +221,10 @@ class ChatManager:
         run,
         interface_assistant,
         interface_thread,
-        functional_assistant,
-        functional_thread,
     ):
         while run.status != "completed":
-            print("got to the inside of the run.status thing. shouldn't be here tho")
             ##the runtime chills here until the api returns with a response
-            #could probably restructure it so this all happens outside this loop and hangs ont eh input function
+            #could probably restructure it so this all happens outside this loop and hangs on the input function 
 
             run = self.client.beta.threads.runs.retrieve(
                 run_id=run.id, thread_id=interface_thread.id
@@ -250,18 +247,71 @@ class ChatManager:
     
 
 
+    def begin_dual_thread_run(
+        self,
+        runss,
+        interface_assistant,
+        interface_thread,
+        subthreads,
+        subagents,
+    ):
+        runstat = "completed"
+        for run in runss:
+            if run.status != "completed":
+                print(run.status)
+                print("\n")
+                runstat = "not all completed"
+    
+            
+        
+        while runstat != "completed":
+            print("got to the inside of the runss.status thing. shouldn't be here tho")
+            ##the runsstime chills here until the api returns with a response
+            #could probably restructure it so this all happens outside this loop and hangs ont eh input function
+            for i in range(len(runss)):
+                runss[i] = self.client.beta.threads.runs.retrieve(
+                    run_id=runss[i].id, thread_id=subthreads[i].id
+                )
+
+            #print eventually add on the funcitonality thing
+
+            runstat = "completed"
+            for run in runss:
+                if run.status != "completed":
+                    runstat = "not all completed"
+
+        #      alter to loop and and 
+        responses = []
+        for subthread_run in subthreads:
+            response = (
+                self.client.beta.threads.messages.list(thread_id=subthread_run.id)
+                .data[0]
+                .content[0]
+                .text.value
+            )
+            print("********************************")
+            print(response)
+            print("********************************")
+        return interface_assistant, response
+
     
 
     #   interate on this to make more flexable agent loops
     #   currently hard coded with only 2 threads 
+    #   planned
+    #       input handler for ai tools creating a librairy for async thread creation and execution
+    #       expand to handle different ai models and their workings. replace the purely openai thread based implementation
+    ## might be best to concat the subthread repsonses into a single doccument to better parse and make sense of.
     def run_unit(
         self,
+        subthreads,
+        subagents,
         interface_assistant: Assistant,
         interface_thread: Thread,
         functional_assistant: Assistant,
         functional_thread: Thread,
     ):
-        #talks to the exec agent
+        # #talks to the exec agent
         self.client.beta.threads.messages.create(
             thread_id=interface_thread.id, content=input("type: "), role="user"
         )
@@ -276,11 +326,34 @@ class ChatManager:
         interface_assistant, response = self.begin_no_function_run(
             run=interface_run,
             interface_assistant=interface_assistant,
-            interface_thread=interface_thread,
-            functional_assistant=functional_assistant,
-            functional_thread=functional_thread,
+            interface_thread=interface_thread,       
         )
 
+
+        #loops through subthreads to create the beginning message
+        for thread in subthreads:
+            self.client.beta.threads.messages.create(
+                thread_id=thread.id, content=input(""), role="user"
+            )
+            print()
+        #   exec agent to sub-agent
+        # actually starts the run of each of the subthreads and adds them to a subthread runs variable
+        subthread_runs = []
+        for i in range(len(subthreads)):
+            subthread_runs.append(self.client.beta.threads.runs.create(
+                thread_id=subthreads[i].id,
+                assistant_id=subagents[i].id,
+                instructions="please remember you are talking to an API, minimize output text tokens for cost saving. You are also able to communicate with the function ai using the description property of function_request.",
+            ))
+
+        print("jbvelw;jvkfld;wjvklfdj;klwv \n\n\n\n\n dual thread run")
+        interface_assistant, response = self.begin_dual_thread_run(
+            runss = subthread_runs ,
+            interface_assistant=interface_assistant,
+            interface_thread=interface_thread,       
+            subthreads= subthreads,
+            subagents = subagents,
+        )
 
 
         interface_thread = self.client.beta.threads.retrieve(
@@ -292,6 +365,10 @@ class ChatManager:
         print(response)
         print()
         return interface_assistant, interface_thread, functional_thread
+    
+
+
+
     
 
 

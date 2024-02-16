@@ -4,14 +4,13 @@
 This project aims to create an AI agent swarm with an emphasis on orchestration and cohesion between them. The eventual goal being to have an autonomous system that can handle tasks accurately with minimal human oversight.
 
 
-This project is an offshoot of the HAAS project. Check them out [here](https://github.com/daveshap/OpenAI_Agent_Swarm) to contribute.
 
 # Structure
 
 The overall structure of the project is centred on the communication between agents and orchestrating how they will interact. Using the experimental features of OpenAI's API the system attempts to limit the scope needed from each agent and as a result provide relevant context in order to increase accuracy and decrease costs from usage.
 
-![alt text](<exec agent-1.png>)
 
+![alt text](<./exec agent.png>)
 
 ## System Architecture
 
@@ -55,7 +54,6 @@ The current goal is to fully implement a modular single tier orchestration syste
 #### Tool Creation
 
 
-follow the following steps [here](https://platform.openai.com/docs/quickstart?context=python) to set up your environment for running the OpenAI API
 
 
 Run the following commands to get started:
