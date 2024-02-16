@@ -4,6 +4,7 @@ from agents.tool_maker.tool_manager import ToolManager
 from agents.tool_maker.assistant_manager import AssistantManager
 import json
 import os
+import time
 from openai import OpenAI
 
 Assistant = type(OpenAI().beta.assistants.list().data[0])
@@ -222,6 +223,7 @@ class ChatManager:
         interface_assistant,
         interface_thread,
     ):
+        start_time = time.time()
         while run.status != "completed":
             ##the runtime chills here until the api returns with a response
             #could probably restructure it so this all happens outside this loop and hangs on the input function 
@@ -230,19 +232,23 @@ class ChatManager:
                 run_id=run.id, thread_id=interface_thread.id
             )
 
-            print (run)
+            #print (run)
             if run.status == "requires_action":
                 tools = []
                 responses = []
-                print(run.status)
-                print(run)
-                print(responses)
+                #print(run.status)
+                #print(run)
+                #print(responses)
         response = (
             self.client.beta.threads.messages.list(thread_id=interface_thread.id)
             .data[0]
             .content[0]
             .text.value
         )
+        end_time = time.time()
+        duration = end_time - start_time
+        print(f"the no function assistant run took {duration}s")
+
         return interface_assistant, response
     
 
@@ -255,17 +261,18 @@ class ChatManager:
         subthreads,
         subagents,
     ):
+        start_time = time.time()
         runstat = "completed"
         for run in runss:
             if run.status != "completed":
-                print(run.status)
+                #print(run.status)
                 print("\n")
                 runstat = "not all completed"
     
             
         
         while runstat != "completed":
-            print("got to the inside of the runss.status thing. shouldn't be here tho")
+            print("Dual thread")
             ##the runsstime chills here until the api returns with a response
             #could probably restructure it so this all happens outside this loop and hangs ont eh input function
             for i in range(len(runss)):
@@ -281,7 +288,7 @@ class ChatManager:
                     runstat = "not all completed"
 
         #      alter to loop and and 
-        responses = []
+        response = ""
         for subthread_run in subthreads:
             response = (
                 self.client.beta.threads.messages.list(thread_id=subthread_run.id)
@@ -291,7 +298,14 @@ class ChatManager:
             )
             print("********************************")
             print(response)
-            print("********************************")
+            print("******************")
+
+        end_time = time.time()
+        duration = end_time - start_time
+        print(f"the no function assistant run took {duration//60}:{duration%60}")
+        print("********************************")
+
+    
         return interface_assistant, response
 
     
@@ -329,11 +343,14 @@ class ChatManager:
             interface_thread=interface_thread,       
         )
 
+        print(f"\n\n {response}" )
 
+        
         #loops through subthreads to create the beginning message
-        for thread in subthreads:
+        for index, thread in enumerate(subthreads):
             self.client.beta.threads.messages.create(
-                thread_id=thread.id, content=input(""), role="user"
+                thread_id=thread.id, content=input(f"input for subthread {index}:"), role="user"
+
             )
             print()
         #   exec agent to sub-agent
@@ -346,8 +363,8 @@ class ChatManager:
                 instructions="please remember you are talking to an API, minimize output text tokens for cost saving. You are also able to communicate with the function ai using the description property of function_request.",
             ))
 
-        print("jbvelw;jvkfld;wjvklfdj;klwv \n\n\n\n\n dual thread run")
-        interface_assistant, response = self.begin_dual_thread_run(
+        print(" \n\n\n\n\n dual thread run\n\n\n\n\n")
+        interface_assistant, _ = self.begin_dual_thread_run(
             runss = subthread_runs ,
             interface_assistant=interface_assistant,
             interface_thread=interface_thread,       
@@ -362,7 +379,7 @@ class ChatManager:
         functional_thread = self.client.beta.threads.retrieve(
             thread_id=functional_thread.id
         )
-        print(response)
+        # print(response)
         print()
         return interface_assistant, interface_thread, functional_thread
     
