@@ -15,6 +15,8 @@ class AgentBuilder:
             for assistant in  self.client.beta.assistants.list(limit=100):
                 self.existing_assistants[assistant.name] = assistant
 
+
+    #set the name of any created function 
     def create_assistant(self, agent_name):
         current_file_path = Path(__file__).absolute().parent
         agent_folder = os.path.join(current_file_path, self.agents_path, agent_name)
@@ -117,7 +119,10 @@ class AgentBuilder:
                 if len(update_params) != 0:
                     print(f"Updating {agent_name}'s { ','.join(update_params.keys()) }") 
                     update_params['assistant_id'] = existing_agent.id
-                    assistant = self.client.beta.assistants.update(**update_params)
+
+
+                    ## this part is depprecated, or at least causes a lot of issues with the openai
+                    #assistant = self.client.beta.assistants.update(**update_params)
                 else:
                   print(f"{agent_name} is up to date")         
             else:        
