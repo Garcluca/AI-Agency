@@ -122,7 +122,7 @@ class AgentBuilder:
 
 
                     ## this part is depprecated, or at least causes a lot of issues with the openai
-                    #assistant = self.client.beta.assistants.update(**update_params)
+                    #\assistant = self.client.beta.assistants.update(**update_params)
                 else:
                   print(f"{agent_name} is up to date")         
             else:        
