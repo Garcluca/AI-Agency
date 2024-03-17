@@ -346,6 +346,89 @@ class ChatManager:
     #       input handler for ai tools creating a librairy for async thread creation and execution
     #       expand to handle different ai models and their workings. replace the purely openai thread based implementation
     ## might be best to concat the subthread repsonses into a single doccument to better parse and make sense of.
+
+    def lined_dual_thread(
+        
+        self,
+        interface_assistant,
+        interface_thread,
+        subthreads,
+        subagents,
+    ):
+        print(" \n dual thread installed run\n")
+        
+        # takes input for each individual gpt and puts them into their respective llm thread
+        for index, thread in enumerate(subthreads):
+            self.client.beta.threads.messages.create(
+                thread_id=thread.id, content=input(f"input for subthread {index}:"), role="user"
+            )
+            print(thread)
+            print("\n")
+        print()
+    
+        #creates a run which commands the openai llm to operate on the underad thread messages. 
+        #need to test if it's all the messages or just the unread ones 
+        runss = []
+        for i in range(len(subthreads)):
+            runss.append(self.client.beta.threads.runs.create(
+                thread_id=subthreads[i].id,
+                assistant_id=subagents[i].id,
+                instructions="please remember you are talking to an API, minimize output text tokens for cost saving. You are also able to communicate with the function ai using the description property of function_request.",
+            ))    
+            print(runss)
+
+        start_time = time.time()
+        runstat = "completed"
+        for run in runss:
+            if run.status != "completed":
+                #print(run.status)
+                print("\n\n")
+                runstat = "not all completed"
+    
+            
+        ##the runsstime chills here until the api returns with a response
+        #could probably restructure it so this all happens outside this loop
+        while runstat != "completed":
+            print("dual thread running\n\n")
+            
+            for i in range(len(runss)):
+                runss[i] = self.client.beta.threads.runs.retrieve(
+                    run_id=runss[i].id, thread_id=subthreads[i].id
+                )
+                print(subthreads[i])
+                print("\n")
+
+            runstat = "completed"
+            for run in runss:
+                print(run.status)
+                if run.status != "completed":
+                    runstat = "not all completed"
+
+       #prints each response             
+        response = ""
+        for subthread_run in subthreads:
+            response = (
+                self.client.beta.threads.messages.list(thread_id=subthread_run.id)
+                .data[0]
+                .content[0]
+                .text.value
+            )
+            print("********************************")
+            print(response)
+            print("******************")
+
+        end_time = time.time()
+        duration = end_time - start_time
+        print(f"the no function assistant run took {duration//60}:{duration%60}")
+        print("********************************")
+
+    
+        return interface_assistant, response
+
+
+
+
+
     def run_unit(
         self,
         subthreads,
@@ -396,6 +479,8 @@ class ChatManager:
             subthreads= subthreads,
             subagents = subagents,
         )
+
+
 
 
         interface_thread = self.client.beta.threads.retrieve(
