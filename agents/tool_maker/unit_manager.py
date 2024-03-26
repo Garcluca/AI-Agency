@@ -56,6 +56,7 @@ class Unit:
     def chat(self):
         """
         Accepts user input and performs a thread run with the `interface_assistant`
+
         """
 
         while True:
@@ -74,6 +75,9 @@ class Unit:
     def exec_chat(self):
         """
         Accepts user input and performs a thread run with the `interface_assistant`
+        this actualy worKS, need to make the unite tester funciton on top of the current writer
+            pros better than nothing, and MUCH better than just straight errors
+            cons AI testwriting would have the same inherent flaws as the code that it is aimed to test 
         """
 
             # start with the main thread between the exec and the user.

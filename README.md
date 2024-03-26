@@ -9,6 +9,8 @@ This project aims to create an AI agent swarm with an emphasis on orchestration 
 
 The overall structure of the project is centred on the communication between agents and orchestrating how they will interact. Using the experimental features of OpenAI's API the system attempts to limit the scope needed from each agent and as a result provide relevant context in order to increase accuracy and decrease costs from usage.
 
+[thingy](notes.md)
+
 
 ![alt text](<./exec agent.png>)
 

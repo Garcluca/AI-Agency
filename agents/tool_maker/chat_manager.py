@@ -429,6 +429,8 @@ class ChatManager:
 
 
 
+
+    
     def run_unit(
         self,
         subthreads,
@@ -499,3 +501,82 @@ class ChatManager:
     
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#just for testing the exec line in order to make sure the exec agent is working
+
+def run_prompt_engineer(
+            self,
+        subthreads,
+        subagents,
+        interface_assistant: Assistant,
+        interface_thread: Thread,
+        functional_assistant: Assistant,
+        functional_thread: Thread,
+    ):
+        # #talks to the exec agent
+        self.client.beta.threads.messages.create(
+            thread_id=interface_thread.id, content=input("type: "), role="user"
+        )
+        print()
+
+        interface_assistant, response = self.begin_no_function_run(
+            interface_assistant=interface_assistant,
+            interface_thread=interface_thread,       
+        )
+
+        print(f"\n\n {response}" )
+
+        #just for staging, but tests that initalizing the threads in here from a master list created at the same level as the exec ai will work and retain information
+        #later change it to a list that takes input from a function which will count each different new ai model that needs to be made be specalist prompts that are given by the exec.
+        #did a less than and equal to by accident and ended up testing that the array stays in the right order, and talks to the right thread and model if the array is added to. 
+        if len(subagents) < 2:
+            for i in range(2):
+                print(f"\n\ncreated thread {i}")
+                self.thread_temp = self.create_empty_thread()
+                subthreads.append(self.thread_temp)
+
+
+            for i in range(2):
+                print(f"\n\n created assistant {i}")
+                self.assistant_temp = self.assistant_manager.get_assistant()
+                subagents.append(self.assistant_temp)
+                #print(subagents)
+
+
+    #loops through subthreads to create the beginning message
+        #   exec agent to sub-agent
+        # actually starts the run of each of the subthreads and adds them to a subthread runs variable
+
+        print(" \n dual thread run\n")
+        interface_assistant, _ = self.begin_dual_thread_run(
+            interface_assistant=interface_assistant,
+            interface_thread=interface_thread,       
+            subthreads= subthreads,
+            subagents = subagents,
+        )
+
+
+
+
+        interface_thread = self.client.beta.threads.retrieve(
+            thread_id=interface_thread.id
+        )
+        functional_thread = self.client.beta.threads.retrieve(
+            thread_id=functional_thread.id
+        )
+        print(response)
+        print()
+        return interface_assistant, interface_thread, functional_thread
